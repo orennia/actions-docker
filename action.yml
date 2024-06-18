@@ -17,6 +17,10 @@ inputs:
   aws-secret-access-key:
     description: "The AWS secret access key"
     required: true
+  build-opts:
+    description: "Additional options to pass to the docker build command"
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -40,7 +44,7 @@ runs:
       uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
     - name: Build the Docker image
       shell: bash
-      run: docker build --tag ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:${{ steps.semantic-version.outputs.version }} ${{ inputs.context-path }}
+      run: docker build ${{ inputs.build-opts }} --tag ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:${{ steps.semantic-version.outputs.version }} ${{ inputs.context-path }}
     - name: Push the Docker image
       shell: bash
       run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:${{ steps.semantic-version.outputs.version }}
