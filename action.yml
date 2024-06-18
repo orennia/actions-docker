@@ -1,0 +1,47 @@
+name: "Orennia Docker Build and Push"
+description: "Builds and pushes a Docker image to Amazon ECR"
+inputs:
+  repo:
+    required: true
+    type: string
+  context-path:
+    required: true
+    type: string
+  aws-region:
+    required: true
+    type: string
+    default: us-east-1
+secrets:
+  aws-access-key-id:
+    required: true
+  aws-secret-access-key:
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+      id: checkout
+      with:
+        fetch-depth: 0
+    - uses: paulhatch/semantic-version@v5.3.0
+      id: semantic-version
+      with:
+        branch: main
+        bump_each_commit: true
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@0e613a0980cbf65ed5b322eb7a1e075d28913a83
+      with:
+        aws-access-key-id: ${{ secrets.aws-access-key-id }}
+        aws-secret-access-key: ${{ secrets.aws-secret-access-key}}
+        aws-region: ${{ inputs.aws-region }}
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
+    - name: Build the Docker image
+      run: docker build --tag ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:${{ steps.semantic-version.outputs.version }} ${{ inputs.context-path }}
+    - name: Push the Docker image
+      run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:${{ steps.semantic-version.outputs.version }}
+    - name: Also tag latest
+      run: docker tag ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:${{ steps.semantic-version.outputs.version }} ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:latest
+    - name: Push the latest Docker image
+      run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:latest
