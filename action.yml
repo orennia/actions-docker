@@ -39,10 +39,14 @@ runs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
     - name: Build the Docker image
+      shell: bash
       run: docker build --tag ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:${{ steps.semantic-version.outputs.version }} ${{ inputs.context-path }}
     - name: Push the Docker image
+      shell: bash
       run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:${{ steps.semantic-version.outputs.version }}
     - name: Also tag latest
+      shell: bash
       run: docker tag ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:${{ steps.semantic-version.outputs.version }} ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:latest
     - name: Push the latest Docker image
+      shell: bash
       run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:latest
