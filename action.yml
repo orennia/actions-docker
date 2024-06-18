@@ -3,18 +3,19 @@ description: "Builds and pushes a Docker image to Amazon ECR"
 inputs:
   repo:
     required: true
-    type: string
+    description: "The name of the repository to push the image to"
   context-path:
     required: true
-    type: string
+    description: "The path to the Docker context to build"
   aws-region:
+    description: "The AWS region to push the image to"
     required: true
-    type: string
     default: us-east-1
-secrets:
   aws-access-key-id:
+    description: "The AWS access key ID"
     required: true
   aws-secret-access-key:
+    description: "The AWS secret access key"
     required: true
 runs:
   using: "composite"
@@ -31,8 +32,8 @@ runs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@0e613a0980cbf65ed5b322eb7a1e075d28913a83
       with:
-        aws-access-key-id: ${{ secrets.aws-access-key-id }}
-        aws-secret-access-key: ${{ secrets.aws-secret-access-key}}
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key}}
         aws-region: ${{ inputs.aws-region }}
     - name: Login to Amazon ECR
       id: login-ecr
